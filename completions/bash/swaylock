@@ -33,6 +33,7 @@ _swaylock()
     --color
     --config
     --daemonize
+    --clearstr
     --debug
     --disable-caps-lock-text
     --font
@@ -80,6 +81,8 @@ _swaylock()
     --text-wrong-color
     --tiling
     --version
+    --verstr
+    --wrongstr
   )
 
   scaling=(

@@ -5,6 +5,7 @@ complete -c swaylock -l caps-lock-bs-hl-color       --description "Sets the colo
 complete -c swaylock -l caps-lock-key-hl-color      --description "Sets the color of the key press highlight segments when Caps Lock is active."
 complete -c swaylock -l color                  -s c --description "Turn the screen into the given color instead of white."
 complete -c swaylock -l config                 -s C --description "Path to the config file."
+complete -c swaylock -l clearstr                    --description The string displayed when the password is cleared."
 complete -c swaylock -l daemonize              -s f --description "Detach from the controlling terminal after locking."
 complete -c swaylock -l debug                  -s d --description "Enable debugging output."
 complete -c swaylock -l disable-caps-lock-text -s L --description "Disable the Caps Lock text."
@@ -53,3 +54,5 @@ complete -c swaylock -l text-ver-color              --description "Sets the colo
 complete -c swaylock -l text-wrong-color            --description "Sets the color of the text when invalid."
 complete -c swaylock -l tiling                 -s t --description "Same as --scaling=tile."
 complete -c swaylock -l version                -s v --description "Show the version number and quit."
+complete -c swaylock -l verstr                      --description The string displayed when the password is being verified."
+complete -c swaylock -l wrongstr                    --description The string displayed when the password is wrong."
