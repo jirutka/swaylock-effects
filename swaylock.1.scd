@@ -252,6 +252,11 @@ or an *uint32\_t swaylock_pixel(uint32\_t pix, int x, int y, int width, int heig
 *--time-effects*
 	Measure the time it takes to run each effect.
 
+# SIGNALS
+
+*SIGUSR1*
+	Unlock the screen and exit.
+
 # AUTHORS
 
 Maintained by Martin Dørum, forked from upstream Swaylock which is maintained

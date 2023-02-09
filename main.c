@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1760,6 +1761,16 @@ static void timer_render(void *data) {
 	loop_add_timer(state->eventloop, 1000, timer_render, state);
 }
 
+static int sigusr_fds[2] = {-1, -1};
+
+void do_sigusr(int sig) {
+	(void)write(sigusr_fds[1], "1", 1);
+}
+
+static void term_in(int fd, short mask, void *data) {
+	state.run_display = false;
+}
+
 int main(int argc, char **argv) {
 	swaylock_log_init(LOG_ERROR);
 	initialize_pw_backend(argc, argv);
@@ -1837,6 +1848,11 @@ int main(int argc, char **argv) {
 
 	if (state.args.password_grace_period > 0) {
 		state.auth_state = AUTH_STATE_GRACE;
+	}
+
+	if (pipe(sigusr_fds) != 0) {
+		swaylock_log(LOG_ERROR, "Failed to pipe");
+		return 1;
 	}
 
 #ifdef __linux__
@@ -1948,6 +1964,9 @@ int main(int argc, char **argv) {
 	loop_add_fd(state.eventloop, get_comm_reply_fd(), POLLIN, comm_in, NULL);
 
 	loop_add_timer(state.eventloop, 1000, timer_render, &state);
+
+	loop_add_fd(state.eventloop, sigusr_fds[0], POLLIN, term_in, NULL);
+	signal(SIGUSR1, do_sigusr);
 
 	if (state.args.fade_in) {
 		loop_add_timer(state.eventloop, state.args.fade_in, end_allow_fade_period, &state);
