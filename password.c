@@ -113,10 +113,6 @@ void swaylock_handle_key(struct swaylock_state *state,
 		state->run_display = false;
 		return;
 	}
-	// Ignore input events if validating
-	if (state->auth_state == AUTH_STATE_VALIDATING) {
-		return;
-	}
 
 	switch (keysym) {
 	case XKB_KEY_KP_Enter: /* fallthrough */
