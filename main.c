@@ -843,7 +843,7 @@ static bool random_image_filter(const char *path) {
 		return false;
 	}
 	if (S_ISREG(stat_buffer.st_mode)) {
-		// Only count regular files, excluding directories etc.
+		// Consider only regular files, excluding directories etc.
 		return true;
 	}
 	return false;
