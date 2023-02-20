@@ -11,6 +11,8 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <limits.h>
 #include <time.h>
 #include <unistd.h>
 #include <wayland-client.h>
@@ -834,6 +836,63 @@ static char *join_args(char **argv, int argc) {
 	return res;
 }
 
+// Return true if a file is a candidate for a background image.
+static bool random_image_filter(const char *path) {
+	struct stat stat_buffer;
+	if (stat(path, &stat_buffer) == -1) {
+		return false;
+	}
+	if (S_ISREG(stat_buffer.st_mode)) {
+		// Only count regular files, excluding directories etc.
+		return true;
+	}
+	return false;
+}
+
+// If the argument is a directory, choose a random file from it and
+// return the path. If it is not a directory or it is empty, return NULL.
+static char *choose_random_image(const char *directory) {
+	DIR *dir = opendir(directory);
+	if (dir != NULL) {
+		struct dirent *entry;
+		size_t file_count = 0;
+
+		// Get the number of files in the directory.
+		// Paths can be longer than PATH_MAX, so this might fail.
+		char path_buffer[PATH_MAX];
+		while ((entry = readdir(dir)) != NULL) {
+			snprintf(path_buffer, PATH_MAX, "%s/%s", directory, entry->d_name);
+			if (random_image_filter(path_buffer)) {
+				++file_count;
+			}
+		}
+
+		if (file_count == 0) {
+			// We must return here, because modulo will fail otherwise.
+			return NULL;
+		}
+
+		// Select random file.
+		size_t selected_file = rand() % file_count;
+		rewinddir(dir);
+		size_t i = 0;
+		while ((entry = readdir(dir)) != NULL) {
+			snprintf(path_buffer, PATH_MAX, "%s/%s", directory, entry->d_name);
+			if (!random_image_filter(path_buffer)) {
+				continue;
+			}
+			if (i == selected_file) {
+				char *path = malloc(strlen(path_buffer)+1);
+				strcpy(path, path_buffer);
+				return path;
+			}
+			++i;
+		}
+		closedir(dir);
+	}
+	return NULL;
+}
+
 static void load_image(char *arg, struct swaylock_state *state) {
 	// [[<output>]:]<path>
 	struct swaylock_image *image = calloc(1, sizeof(struct swaylock_image));
@@ -881,6 +940,13 @@ static void load_image(char *arg, struct swaylock_state *state) {
 		free(image->path);
 		image->path = join_args(p.we_wordv, p.we_wordc);
 		wordfree(&p);
+	}
+
+	// If path is pointing to a directory, choose random image from it.
+	char* path = choose_random_image(image->path);
+	if (path != NULL) {
+		free(image->path);
+		image->path = path;
 	}
 
 	// Load the actual image
