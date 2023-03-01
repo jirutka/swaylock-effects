@@ -430,6 +430,7 @@ void render_background_image(cairo_t *cairo, cairo_surface_t *image,
 		assert(0);
 		break;
 	}
+	cairo_pattern_set_filter(cairo_get_source(cairo), CAIRO_FILTER_BILINEAR);
 	cairo_paint_with_alpha(cairo, alpha);
 	cairo_restore(cairo);
 }
