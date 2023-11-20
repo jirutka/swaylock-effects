@@ -88,6 +88,7 @@ The following table shows the relation between the swaylock-effect and swaylock 
 
 * Alpine Linux: [swaylock-effects](https://pkgs.alpinelinux.org/packages?name=swaylock-effects)
 * Arch Linux (AUR): [swaylock-effects](https://aur.archlinux.org/packages/swaylock-effects/) / [swaylock-effects-git](https://aur.archlinux.org/packages/swaylock-effects-git/)
+* Fedora (Copr): [swaylock-effects](https://copr.fedorainfracloud.org/coprs/trs-sod/swaylock-effects)
 
 The original [mortie/swaylock-effects](https://github.com/mortie/swaylock-effects) (now unmaintained)
 has been packaged for:

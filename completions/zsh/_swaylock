@@ -55,5 +55,5 @@ _arguments -s \
 	'(--text-color)'--text-color'[Sets the color of the text]:color:' \
 	'(--text-ver-color)'--text-ver-color'[Sets the color of the text when verifying]:color:' \
 	'(--text-wrong-color)'--text-wrong-color'[Sets the color of the text when invalid]:color:' \
-	'(--tiling -t)'{--tiling,-t}'[Same as --scaling=tile]' \
+	'(--tiling -T)'{--tiling,-T}'[Same as --scaling=tile]' \
 	'(--version -v)'{--version,-v}'[Show the version number and quit]'

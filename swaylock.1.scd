@@ -103,7 +103,7 @@ Locks your Wayland session.
 	_solid\_color_. Use _solid\_color_ to display only the background color, even
 	if a background image is specified.
 
-*-t, --tiling*
+*-T, --tiling*
 	Same as --scaling=tile.
 
 *-c, --color* <rrggbb[aa]>

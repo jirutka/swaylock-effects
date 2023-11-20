@@ -105,7 +105,7 @@ static const char *parse_screen_pos_pair(const char *str, char delim,
 }
 
 static const char *parse_constant(const char *str1, const char *str2) {
-	size_t len = strlen(str2); 
+	size_t len = strlen(str2);
 	if (strncmp(str1, str2, len) == 0) {
 		return str1 + len;
 	} else {
@@ -945,7 +945,6 @@ enum line_mode {
 static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		enum line_mode *line_mode, char **config_path) {
 	enum long_option_codes {
-		LO_TRACE,
 		LO_BS_HL_COLOR = 256,
 		LO_CAPS_LOCK_BS_HL_COLOR,
 		LO_CAPS_LOCK_KEY_HL_COLOR,
@@ -1004,7 +1003,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		{"config", required_argument, NULL, 'C'},
 		{"color", required_argument, NULL, 'c'},
 		{"debug", no_argument, NULL, 'd'},
-		{"trace", no_argument, NULL, LO_TRACE},
+		{"trace", no_argument, NULL, 't'},
 		{"ignore-empty-password", no_argument, NULL, 'e'},
 		{"daemonize", no_argument, NULL, 'f'},
 		{"help", no_argument, NULL, 'h'},
@@ -1015,7 +1014,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		{"line-uses-inside", no_argument, NULL, 'n'},
 		{"line-uses-ring", no_argument, NULL, 'r'},
 		{"scaling", required_argument, NULL, 's'},
-		{"tiling", no_argument, NULL, 't'},
+		{"tiling", no_argument, NULL, 'T'},
 		{"no-unlock-indicator", no_argument, NULL, 'u'},
 		{"show-keyboard-layout", no_argument, NULL, 'k'},
 		{"hide-keyboard-layout", no_argument, NULL, 'K'},
@@ -1119,7 +1118,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 			"Show the current Caps Lock state also on the indicator.\n"
 		"  -s, --scaling <mode>             "
 			"Image scaling mode: stretch, fill, fit, center, tile, solid_color.\n"
-		"  -t, --tiling                     "
+		"  -T, --tiling                     "
 			"Same as --scaling=tile.\n"
 		"  -u, --no-unlock-indicator        "
 			"Disable the unlock indicator.\n"
@@ -1255,7 +1254,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		case 'd':
 			swaylock_log_init(LOG_DEBUG);
 			break;
-		case LO_TRACE:
+		case 't':
 			swaylock_log_init(LOG_TRACE);
 			break;
 		case 'e':
@@ -1999,6 +1998,7 @@ int main(int argc, char **argv) {
 	}
 	if (state.ext_session_lock_v1) {
 		ext_session_lock_v1_unlock_and_destroy(state.ext_session_lock_v1);
+		wl_display_roundtrip(state.display);
 		wl_display_flush(state.display);
 	}
 
