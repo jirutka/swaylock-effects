@@ -40,7 +40,7 @@ if get_option('sse')
 	add_project_arguments('-DUSE_SSE', language: 'c')
 endif
 
-wayland_client = dependency('wayland-client')
+wayland_client = dependency('wayland-client', version: '>=1.20.0')
 wayland_protos = dependency('wayland-protocols', version: '>=1.25', fallback: 'wayland-protocols')
 wayland_scanner = dependency('wayland-scanner', version: '>=1.15.0')
 xkbcommon = dependency('xkbcommon')
@@ -88,7 +88,6 @@ client_protos_headers = []
 
 client_protocols = [
 	[wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
-	[wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
 	[wl_protocol_dir, 'staging/ext-session-lock/ext-session-lock-v1.xml'],
 	['wlr-layer-shell-unstable-v1.xml'],
 	['wlr-input-inhibitor-unstable-v1.xml'],
