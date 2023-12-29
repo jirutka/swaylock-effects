@@ -95,13 +95,25 @@ void render_frame_background(struct swaylock_surface *surface, bool commit) {
 	if (surface->image && state->args.mode != BACKGROUND_MODE_SOLID_COLOR) {
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		if (fade_is_complete(&surface->fade)) {
-			render_background_image(cairo, surface->image,
-				state->args.mode, buffer_width, buffer_height, 1);
+			if (!surface->scaled_image) {
+				surface->scaled_image =
+					scale_background_image(surface->image, state->args.mode,
+						buffer_width, buffer_height);
+			}
+			render_background_image(cairo, surface->scaled_image, 1);
 		} else {
-			render_background_image(cairo, surface->screencopy.original_image,
-				state->args.mode, buffer_width, buffer_height, 1);
-			render_background_image(cairo, surface->image,
-				state->args.mode, buffer_width, buffer_height, surface->fade.alpha);
+			if (!surface->screencopy.scaled_image) {
+				surface->screencopy.scaled_image =
+					scale_background_image(surface->screencopy.original_image,
+						 state->args.mode, buffer_width, buffer_height);
+			}
+			render_background_image(cairo, surface->screencopy.scaled_image, 1);
+			if (!surface->scaled_image) {
+				surface->scaled_image =
+					scale_background_image(surface->image, state->args.mode,
+						buffer_width, buffer_height);
+			}
+			render_background_image(cairo, surface->scaled_image, surface->fade.alpha);
 		}
 	}
 	cairo_restore(cairo);
