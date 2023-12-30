@@ -5,3 +5,4 @@ option('zsh-completions', type: 'boolean', value: true, description: 'Install zs
 option('bash-completions', type: 'boolean', value: true, description: 'Install bash shell completions')
 option('fish-completions', type: 'boolean', value: true, description: 'Install fish shell completions')
 option('sse', type: 'boolean', value: true, description: 'Use SSE instructions where possible')
+option('fingerprint', type: 'feature', value: 'auto', description: 'Enable fingerprint support')
