@@ -130,6 +130,10 @@ Run these commands:
 	ninja -C build
 	sudo ninja -C build install
 
+On systems with PAM, copy pam/swaylock to /etc/pam.d/swaylock
+
+	sudo cp pam/swaylock /etc/pam.d/swaylock
+
 On systems without PAM, you need to suid the swaylock binary:
 
 	sudo chmod a+s /usr/local/bin/swaylock
