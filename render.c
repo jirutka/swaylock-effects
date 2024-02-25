@@ -53,6 +53,7 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 
+	// Write time
 	if (surface->state->args.timestr[0]) {
 		strftime(tbuf, sizeof(tbuf), surface->state->args.timestr, tm);
 		*tstr = tbuf;
@@ -82,8 +83,16 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
         	strncpy(dbuf, tempbuf, sizeof(dbuf));
         	// Assign dbuf to *dstr
 	        *dstr = dbuf;
+	} else if (surface->state->args.battery) {
+		char tempbuf[256];
+		// Write battery percentage
+		snprintf(tempbuf, sizeof(tempbuf), "%s", battery_str);
+		// Copy the modified date string to dbuf
+		strncpy(dbuf, tempbuf, sizeof(dbuf));
+		// Assign dbuf to *dstr
+		*dstr = dbuf;
 	} else {
-    		*dstr = NULL;
+		*dstr = NULL;
 	}
 
 
