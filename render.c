@@ -65,12 +65,18 @@ static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr,
         	char tempbuf[256];
 
 			// Write battery percentage as '100% | '
-			if (surface->state->args.battery) {
+			if (surface->state->args.battery && surface->state->args.clock) {
+				// Write battery percentage as '100% | '
 				snprintf(tempbuf, sizeof(tempbuf), "%s | ", battery_str);
+				// Write date
+				strftime(tempbuf + strlen(tempbuf), sizeof(tempbuf) - strlen(tempbuf), surface->state->args.datestr, tm);
+			} else if (surface->state->args.battery) {
+				// Write battery percentage
+				snprintf(tempbuf, sizeof(tempbuf), "%s", battery_str);
+			} else {
+				// Write date
+				strftime(tempbuf, sizeof(tempbuf), surface->state->args.datestr, tm);
 			}
-
-			// Write date
-			strftime(tempbuf + strlen(tempbuf), sizeof(tempbuf) - strlen(tempbuf), surface->state->args.datestr, tm);
 
         	// Copy the modified date string to dbuf
         	strncpy(dbuf, tempbuf, sizeof(dbuf));
@@ -304,7 +310,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 					snprintf(attempts, sizeof(attempts), "%d", state->failed_attempts);
 					text = attempts;
 				}
-			} else if (state->args.clock) {
+			} else if (state->args.clock || state->args.battery) {
 				timetext(surface, &text_l1, &text_l2, battery_str);
 			}
 
@@ -324,7 +330,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 			}
 			break;
 		default:
-			if (state->args.clock)
+			if (state->args.clock || state->args.battery)
 				timetext(surface, &text_l1, &text_l2, battery_str);
 			break;
 		}

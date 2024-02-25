@@ -427,9 +427,6 @@ static void surface_frame_handle_done(void *data, struct wl_callback *callback,
     // Print the battery percentage
 	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
 
-	// Print battery percentage to console
-	printf("Battery: %s\n", battery_str);
-
 	struct swaylock_surface *surface = data;
 
 	wl_callback_destroy(callback);
@@ -1008,6 +1005,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		LO_TIME_EFFECTS,
 		LO_INDICATOR,
 		LO_CLOCK,
+		LO_BATTERY,
 		LO_TIMESTR,
 		LO_DATESTR,
 		LO_FADE_IN,
@@ -1088,6 +1086,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		{"time-effects", no_argument, NULL, LO_TIME_EFFECTS},
 		{"indicator", no_argument, NULL, LO_INDICATOR},
 		{"clock", no_argument, NULL, LO_CLOCK},
+		{"battery", no_argument, NULL, LO_BATTERY},
 		{"timestr", required_argument, NULL, LO_TIMESTR},
 		{"datestr", required_argument, NULL, LO_DATESTR},
 		{"fade-in", required_argument, NULL, LO_FADE_IN},
@@ -1652,6 +1651,11 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 				state->args.clock = true;
 			}
 			break;
+		case LO_BATTERY:
+			if (state) {
+				state->args.battery = true;
+			}
+			break;
 		case LO_TIMESTR:
 			if (state) {
 				free(state->args.timestr);
@@ -1909,7 +1913,7 @@ int main(int argc, char **argv) {
 		.allow_fade = true,
 		.password_grace_period = 0,
 
-		.battery = true,
+		.battery = false,
 
 		.text_cleared = strdup("Cleared"),
 		.text_caps_lock = strdup("Caps Lock"),
