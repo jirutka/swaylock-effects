@@ -55,14 +55,14 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
 	struct tm *tm = localtime(&t);
 
 	// Write time
-	if (surface->state->args.timestr[0]) {
+	if (surface->state->args.clock && surface->state->args.timestr[0]) {
 		strftime(tbuf, sizeof(tbuf), surface->state->args.timestr, tm);
 		*tstr = tbuf;
 	} else {
 		*tstr = NULL;
 	}
 
-	if (surface->state->args.datestr[0]) {
+	if (surface->state->args.clock && surface->state->args.datestr[0]) {
 		// Create a temporary buffer to hold the modified date string
 		char tempbuf[256];
 
@@ -336,9 +336,11 @@ void render_frame(struct swaylock_surface *surface) {
 
 		if (text_l1 && !text_l2 && !text_l3) {
 			text = text_l1;
-		if (text_l2 && !text_l1 && !text_l3)
+		}
+		if (text_l2 && !text_l1 && !text_l3) {
 			text = text_l2;
-		if (text_l3 && !text_l1 && !text_l2)
+		}
+		if (text_l3 && !text_l1 && !text_l2) {
 			text = text_l3;
 		}
 
