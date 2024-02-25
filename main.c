@@ -30,11 +30,13 @@
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "ext-session-lock-v1-client-protocol.h"
 
-char battery_str[5];
-bool battery = false;
+#define MAX_BATTERY_STR_LEN 5
+
+static struct swaylock_state state;
 
 void update_battery() {
 	FILE *file;
+	char *battery_str = (char *)malloc((MAX_BATTERY_STR_LEN + 1) * sizeof(char));
     char buffer[128];
     int battery_percentage;
 
@@ -53,7 +55,12 @@ void update_battery() {
     fclose(file);
 
     // Print the battery percentage
-	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
+	snprintf(battery_str, MAX_BATTERY_STR_LEN, "%d%%", battery_percentage);
+
+	// Set battery_str to the battery percentage
+	state.args.battery_str = battery_str;
+
+	// strcpy(state.args.battery_str, battery_str);
 }
 
 // returns a positive integer in milliseconds
@@ -365,7 +372,7 @@ static void initially_render_surface(struct swaylock_surface *surface) {
 
 	if (!surface->state->ext_session_lock_v1) {
 		render_frame_background(surface, true);
-		render_frame(surface, battery_str);
+		render_frame(surface);
 	}
 }
 
@@ -412,7 +419,7 @@ static void ext_session_lock_surface_v1_handle_configure(void *data,
 	render_frame_background(surface, false);
 	ext_session_lock_surface_v1_ack_configure(lock_surface, serial);
 	wl_surface_commit(surface->surface);
-	render_frame(surface, battery_str);
+	render_frame(surface);
 }
 
 static const struct ext_session_lock_surface_v1_listener ext_session_lock_surface_v1_listener = {
@@ -424,9 +431,9 @@ static const struct wl_callback_listener surface_frame_listener;
 static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		uint32_t time) {
 
-	if (battery) {
+	if (state.args.display_battery) {
 		update_battery();
-	}
+	};
 
 	struct swaylock_surface *surface = data;
 
@@ -441,11 +448,11 @@ static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		surface->dirty = false;
 
 		if (!fade_is_complete(&surface->fade)) {
-			render_background_fade(surface, time, battery_str);
+			render_background_fade(surface, time);
 			surface->dirty = true;
 		}
 
-		render_frame(surface, battery_str);
+		render_frame(surface);
 	}
 }
 
@@ -1656,8 +1663,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 			break;
 		case LO_BATTERY:
 			if (state) {
-				state->args.battery = true;
-				battery = true;
+				state->args.display_battery = true;
 			}
 			update_battery();
 			break;
@@ -1783,8 +1789,6 @@ static int load_config(char *path, struct swaylock_state *state,
 	return 0;
 }
 
-static struct swaylock_state state;
-
 static void display_in(int fd, short mask, void *data) {
 	if (wl_display_dispatch(state.display) == -1) {
 		state.run_display = false;
@@ -1890,7 +1894,8 @@ int main(int argc, char **argv) {
 		.allow_fade = true,
 		.password_grace_period = 0,
 
-		.battery = false,
+		.display_battery = false,
+		.battery_str = NULL,
 
 		.text_cleared = strdup("Cleared"),
 		.text_caps_lock = strdup("Caps Lock"),

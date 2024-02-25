@@ -42,7 +42,7 @@ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
 	}
 }
 
-static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, char *battery_str) {
+static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr) {
 	static char dbuf[256];
 	static char tbuf[256];
 
@@ -66,14 +66,14 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
         	char tempbuf[256];
 
 			// Write battery percentage as '100% | '
-			if (surface->state->args.battery && surface->state->args.clock) {
+			if (surface->state->args.display_battery && surface->state->args.clock) {
 				// Write battery percentage as '100% | '
-				snprintf(tempbuf, sizeof(tempbuf), "%s | ", battery_str);
+				snprintf(tempbuf, sizeof(tempbuf), "%s | ", surface->state->args.battery_str);
 				// Write date
 				strftime(tempbuf + strlen(tempbuf), sizeof(tempbuf) - strlen(tempbuf), surface->state->args.datestr, tm);
-			} else if (surface->state->args.battery) {
+			} else if (surface->state->args.display_battery) {
 				// Write battery percentage
-				snprintf(tempbuf, sizeof(tempbuf), "%s", battery_str);
+				snprintf(tempbuf, sizeof(tempbuf), "%s", surface->state->args.battery_str);
 			} else {
 				// Write date
 				strftime(tempbuf, sizeof(tempbuf), surface->state->args.datestr, tm);
@@ -83,10 +83,10 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
         	strncpy(dbuf, tempbuf, sizeof(dbuf));
         	// Assign dbuf to *dstr
 	        *dstr = dbuf;
-	} else if (surface->state->args.battery) {
+	} else if (surface->state->args.display_battery) {
 		char tempbuf[256];
 		// Write battery percentage
-		snprintf(tempbuf, sizeof(tempbuf), "%s", battery_str);
+		snprintf(tempbuf, sizeof(tempbuf), "%s", surface->state->args.battery_str);
 		// Copy the modified date string to dbuf
 		strncpy(dbuf, tempbuf, sizeof(dbuf));
 		// Assign dbuf to *dstr
@@ -158,7 +158,7 @@ void render_frame_background(struct swaylock_surface *surface, bool commit) {
 	}
 }
 
-void render_background_fade(struct swaylock_surface *surface, uint32_t time, char *battery_str) {
+void render_background_fade(struct swaylock_surface *surface, uint32_t time) {
 	if (fade_is_complete(&surface->fade)) {
 		return;
 	}
@@ -166,10 +166,10 @@ void render_background_fade(struct swaylock_surface *surface, uint32_t time, cha
 	fade_update(&surface->fade, time);
 
 	render_frame_background(surface, true);
-	render_frame(surface, battery_str);
+	render_frame(surface);
 }
 
-void render_frame(struct swaylock_surface *surface, char *battery_str) {
+void render_frame(struct swaylock_surface *surface) {
 	struct swaylock_state *state = surface->state;
 
 	int arc_radius = state->args.radius * surface->scale;
@@ -319,8 +319,8 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 					snprintf(attempts, sizeof(attempts), "%d", state->failed_attempts);
 					text = attempts;
 				}
-			} else if (state->args.clock || state->args.battery) {
-				subtext(surface, &text_l1, &text_l2, battery_str);
+			} else if (state->args.clock || state->args.display_battery) {
+				subtext(surface, &text_l1, &text_l2);
 			}
 
 			xkb_layout_index_t num_layout = xkb_keymap_num_layouts(state->xkb.keymap);
@@ -339,8 +339,8 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 			}
 			break;
 		default:
-			if (state->args.clock || state->args.battery)
-				subtext(surface, &text_l1, &text_l2, battery_str);
+			if (state->args.clock || state->args.display_battery)
+				subtext(surface, &text_l1, &text_l2);
 			break;
 		}
 
@@ -510,7 +510,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 		destroy_buffer(buffer);
 		surface->indicator_width = new_width;
 		surface->indicator_height = new_height;
-		render_frame(surface, battery_str);
+		render_frame(surface);
 		return;
 	}
 
