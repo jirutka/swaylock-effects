@@ -381,7 +381,7 @@ void render_frame(struct swaylock_surface *surface) {
 
 			/* Bottom */
 
-			cairo_set_font_size(cairo, arc_radius / 6.0f);
+			cairo_set_font_size(cairo, arc_radius / 5.5f);
 			cairo_text_extents(cairo, text_l2, &extents_l2);
 			cairo_font_extents(cairo, &fe_l2);
 			x_l2 = (buffer_width / 2) -
@@ -409,13 +409,13 @@ void render_frame(struct swaylock_surface *surface) {
 
 				/* Even more Bottom */
 
-				cairo_set_font_size(cairo, arc_radius / 6.0f);
+				cairo_set_font_size(cairo, arc_radius / 5.0f);
 				cairo_text_extents(cairo, text_l3, &extents_l3);
 				cairo_font_extents(cairo, &fe_l3);
 				x_l3 = (buffer_width / 2) -
 					(extents_l3.width / 2 + extents_l3.x_bearing);
 				y_l3 = (buffer_diameter / 2) +
-					(fe_l3.height / 2 - fe_l3.descent) + arc_radius / 2.0f;
+					(fe_l3.height / 2 - fe_l3.descent) + arc_radius / 1.9f;
 
 				cairo_move_to(cairo, x_l3, y_l3);
 				cairo_show_text(cairo, text_l3);
