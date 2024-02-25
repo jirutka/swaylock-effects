@@ -42,7 +42,7 @@ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
 	}
 }
 
-static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr, char *battery_str) {
+static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, char *battery_str) {
 	static char dbuf[256];
 	static char tbuf[256];
 
@@ -311,7 +311,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 					text = attempts;
 				}
 			} else if (state->args.clock || state->args.battery) {
-				timetext(surface, &text_l1, &text_l2, battery_str);
+				subtext(surface, &text_l1, &text_l2, battery_str);
 			}
 
 			xkb_layout_index_t num_layout = xkb_keymap_num_layouts(state->xkb.keymap);
@@ -331,7 +331,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 			break;
 		default:
 			if (state->args.clock || state->args.battery)
-				timetext(surface, &text_l1, &text_l2, battery_str);
+				subtext(surface, &text_l1, &text_l2, battery_str);
 			break;
 		}
 
