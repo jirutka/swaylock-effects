@@ -31,6 +31,30 @@
 #include "ext-session-lock-v1-client-protocol.h"
 
 char battery_str[5];
+bool battery = false;
+
+void update_battery() {
+	FILE *file;
+    char buffer[128];
+    int battery_percentage;
+
+    // Open the file containing battery information
+    file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
+
+    // Read battery percentage from the file
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        fclose(file);
+    }
+
+    // Convert the read value to an integer
+    battery_percentage = atoi(buffer);
+
+    // Close the file
+    fclose(file);
+
+    // Print the battery percentage
+	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
+}
 
 // returns a positive integer in milliseconds
 static uint32_t parse_seconds(const char *seconds) {
@@ -400,32 +424,9 @@ static const struct wl_callback_listener surface_frame_listener;
 static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		uint32_t time) {
 
-	FILE *file;
-    char buffer[128];
-    int battery_percentage;
-
-    // Open the file containing battery information
-    file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
-    if (file == NULL) {
-        perror("Error opening file");
-//        return 1;
-    }
-
-    // Read battery percentage from the file
-    if (fgets(buffer, sizeof(buffer), file) == NULL) {
-        perror("Error reading file");
-        fclose(file);
-//        return 1;
-    }
-
-    // Convert the read value to an integer
-    battery_percentage = atoi(buffer);
-
-    // Close the file
-    fclose(file);
-
-    // Print the battery percentage
-	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
+	if (battery) {
+		update_battery();
+	}
 
 	struct swaylock_surface *surface = data;
 
@@ -1654,7 +1655,9 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		case LO_BATTERY:
 			if (state) {
 				state->args.battery = true;
+				battery = true;
 			}
+			update_battery();
 			break;
 		case LO_TIMESTR:
 			if (state) {
@@ -1849,34 +1852,6 @@ void log_init(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
-	FILE *file;
-    char buffer[128];
-    int battery_percentage;
-
-    // Open the file containing battery information
-    file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
-    if (file == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
-
-    // Read battery percentage from the file
-    if (fgets(buffer, sizeof(buffer), file) == NULL) {
-        perror("Error reading file");
-        fclose(file);
-        return 1;
-    }
-
-    // Convert the read value to an integer
-    battery_percentage = atoi(buffer);
-
-    // Close the file
-    fclose(file);
-
-    // Print the battery percentage
-	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
-
-
 	log_init(argc, argv);
 	initialize_pw_backend(argc, argv);
 	srand(time(NULL));

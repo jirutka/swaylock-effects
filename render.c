@@ -283,7 +283,7 @@ void render_frame(struct swaylock_surface *surface, char *battery_str) {
 		if (state->args.font_size > 0) {
 			font_size = state->args.font_size;
 		} else {
-			font_size = arc_radius / 4.0f;
+			font_size = arc_radius / 3.0f;
 		}
 		cairo_set_font_size(cairo, font_size);
 		switch (state->auth_state) {
