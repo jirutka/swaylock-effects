@@ -54,7 +54,6 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 
-	// Write time
 	if (surface->state->args.clock && surface->state->args.timestr[0]) {
 		strftime(tbuf, sizeof(tbuf), surface->state->args.timestr, tm);
 		*tstr = tbuf;
@@ -63,15 +62,7 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
 	}
 
 	if (surface->state->args.clock && surface->state->args.datestr[0]) {
-		// Create a temporary buffer to hold the modified date string
-		char tempbuf[256];
-
-		// Write the date
-		strftime(tempbuf, sizeof(tempbuf), surface->state->args.datestr, tm);
-
-		// Copy the modified date string to dbuf
-		strncpy(dbuf, tempbuf, sizeof(dbuf));
-		// Assign dbuf to *dstr
+		strftime(dbuf, sizeof(dbuf), surface->state->args.datestr, tm);
 		*dstr = dbuf;
 	} else {
 		*dstr = NULL;
