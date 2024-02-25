@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
+#include <stdio.h>
+#include <string.h>
 #include <wayland-client.h>
 #include "cairo.h"
 #include "background-image.h"
@@ -40,7 +42,7 @@ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
 	}
 }
 
-static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr) {
+static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr, char *battery_str) {
 	static char dbuf[256];
 	static char tbuf[256];
 
@@ -59,11 +61,25 @@ static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr)
 	}
 
 	if (surface->state->args.datestr[0]) {
-		strftime(dbuf, sizeof(dbuf), surface->state->args.datestr, tm);
-		*dstr = dbuf;
+		// Create a temporary buffer to hold the modified date string
+        	char tempbuf[256];
+
+			// Write battery percentage as '100% | '
+			if (surface->state->args.battery) {
+				snprintf(tempbuf, sizeof(tempbuf), "%s | ", battery_str);
+			}
+
+			// Write date
+			strftime(tempbuf + strlen(tempbuf), sizeof(tempbuf) - strlen(tempbuf), surface->state->args.datestr, tm);
+
+        	// Copy the modified date string to dbuf
+        	strncpy(dbuf, tempbuf, sizeof(dbuf));
+        	// Assign dbuf to *dstr
+	        *dstr = dbuf;
 	} else {
-		*dstr = NULL;
+    		*dstr = NULL;
 	}
+
 
 	// Set it back, so we don't break stuff
 	setlocale(LC_TIME, prevloc);
@@ -127,7 +143,7 @@ void render_frame_background(struct swaylock_surface *surface, bool commit) {
 	}
 }
 
-void render_background_fade(struct swaylock_surface *surface, uint32_t time) {
+void render_background_fade(struct swaylock_surface *surface, uint32_t time, char *battery_str) {
 	if (fade_is_complete(&surface->fade)) {
 		return;
 	}
@@ -135,10 +151,10 @@ void render_background_fade(struct swaylock_surface *surface, uint32_t time) {
 	fade_update(&surface->fade, time);
 
 	render_frame_background(surface, true);
-	render_frame(surface);
+	render_frame(surface, battery_str);
 }
 
-void render_frame(struct swaylock_surface *surface) {
+void render_frame(struct swaylock_surface *surface, char *battery_str) {
 	struct swaylock_state *state = surface->state;
 
 	int arc_radius = state->args.radius * surface->scale;
@@ -289,7 +305,7 @@ void render_frame(struct swaylock_surface *surface) {
 					text = attempts;
 				}
 			} else if (state->args.clock) {
-				timetext(surface, &text_l1, &text_l2);
+				timetext(surface, &text_l1, &text_l2, battery_str);
 			}
 
 			xkb_layout_index_t num_layout = xkb_keymap_num_layouts(state->xkb.keymap);
@@ -309,7 +325,7 @@ void render_frame(struct swaylock_surface *surface) {
 			break;
 		default:
 			if (state->args.clock)
-				timetext(surface, &text_l1, &text_l2);
+				timetext(surface, &text_l1, &text_l2, battery_str);
 			break;
 		}
 
@@ -478,7 +494,7 @@ void render_frame(struct swaylock_surface *surface) {
 		destroy_buffer(buffer);
 		surface->indicator_width = new_width;
 		surface->indicator_height = new_height;
-		render_frame(surface);
+		render_frame(surface, battery_str);
 		return;
 	}
 

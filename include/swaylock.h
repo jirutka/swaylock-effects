@@ -82,6 +82,8 @@ struct swaylock_args {
 	bool password_grace_no_mouse;
 	bool password_grace_no_touch;
 
+	bool battery;
+
 	char *text_cleared;
 	char *text_caps_lock;
 	char *text_verifying;
@@ -169,8 +171,8 @@ void swaylock_handle_key(struct swaylock_state *state,
 void swaylock_handle_mouse(struct swaylock_state *state);
 void swaylock_handle_touch(struct swaylock_state *state);
 void render_frame_background(struct swaylock_surface *surface, bool commit);
-void render_background_fade(struct swaylock_surface *surface, uint32_t time);
-void render_frame(struct swaylock_surface *surface);
+void render_background_fade(struct swaylock_surface *surface, uint32_t time, char *battery_str);
+void render_frame(struct swaylock_surface *surface, char *battery_str);
 void damage_surface(struct swaylock_surface *surface);
 void damage_state(struct swaylock_state *state);
 void clear_password_buffer(struct swaylock_password *pw);

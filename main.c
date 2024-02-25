@@ -30,6 +30,8 @@
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "ext-session-lock-v1-client-protocol.h"
 
+char battery_str[5];
+
 // returns a positive integer in milliseconds
 static uint32_t parse_seconds(const char *seconds) {
 	char *endptr;
@@ -339,7 +341,7 @@ static void initially_render_surface(struct swaylock_surface *surface) {
 
 	if (!surface->state->ext_session_lock_v1) {
 		render_frame_background(surface, true);
-		render_frame(surface);
+		render_frame(surface, battery_str);
 	}
 }
 
@@ -386,7 +388,7 @@ static void ext_session_lock_surface_v1_handle_configure(void *data,
 	render_frame_background(surface, false);
 	ext_session_lock_surface_v1_ack_configure(lock_surface, serial);
 	wl_surface_commit(surface->surface);
-	render_frame(surface);
+	render_frame(surface, battery_str);
 }
 
 static const struct ext_session_lock_surface_v1_listener ext_session_lock_surface_v1_listener = {
@@ -397,6 +399,37 @@ static const struct wl_callback_listener surface_frame_listener;
 
 static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		uint32_t time) {
+
+	FILE *file;
+    char buffer[128];
+    int battery_percentage;
+
+    // Open the file containing battery information
+    file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
+    if (file == NULL) {
+        perror("Error opening file");
+//        return 1;
+    }
+
+    // Read battery percentage from the file
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        perror("Error reading file");
+        fclose(file);
+//        return 1;
+    }
+
+    // Convert the read value to an integer
+    battery_percentage = atoi(buffer);
+
+    // Close the file
+    fclose(file);
+
+    // Print the battery percentage
+	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
+
+	// Print battery percentage to console
+	printf("Battery: %s\n", battery_str);
+
 	struct swaylock_surface *surface = data;
 
 	wl_callback_destroy(callback);
@@ -410,11 +443,11 @@ static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		surface->dirty = false;
 
 		if (!fade_is_complete(&surface->fade)) {
-			render_background_fade(surface, time);
+			render_background_fade(surface, time, battery_str);
 			surface->dirty = true;
 		}
 
-		render_frame(surface);
+		render_frame(surface, battery_str);
 	}
 }
 
@@ -1812,6 +1845,34 @@ void log_init(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
+	FILE *file;
+    char buffer[128];
+    int battery_percentage;
+
+    // Open the file containing battery information
+    file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // Read battery percentage from the file
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        perror("Error reading file");
+        fclose(file);
+        return 1;
+    }
+
+    // Convert the read value to an integer
+    battery_percentage = atoi(buffer);
+
+    // Close the file
+    fclose(file);
+
+    // Print the battery percentage
+	snprintf(battery_str, sizeof(battery_str), "%d%%", battery_percentage);
+
+
 	log_init(argc, argv);
 	initialize_pw_backend(argc, argv);
 	srand(time(NULL));
@@ -1823,7 +1884,7 @@ int main(int argc, char **argv) {
 		.mode = BACKGROUND_MODE_FILL,
 		.font = strdup("sans-serif"),
 		.font_size = 0,
-		.radius = 75,
+		.radius = 100,
 		.thickness = 10,
 		.indicator_x_position = 0,
 		.indicator_y_position = 0,
@@ -1844,9 +1905,11 @@ int main(int argc, char **argv) {
 		.indicator = false,
 		.clock = false,
 		.timestr = strdup("%T"),
-		.datestr = strdup("%a, %x"),
+		.datestr = strdup("%x"),
 		.allow_fade = true,
 		.password_grace_period = 0,
+
+		.battery = true,
 
 		.text_cleared = strdup("Cleared"),
 		.text_caps_lock = strdup("Caps Lock"),
