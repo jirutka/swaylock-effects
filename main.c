@@ -1147,6 +1147,8 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 			"Disable the unlock indicator.\n"
 		"  --indicator                      "
 			"Always show the indicator.\n"
+		"  --battery                        "
+			"Show the battery percentage.\n"
 		"  --clock                          "
 			"Show time and date.\n"
 		"  --timestr <format>               "
@@ -1864,7 +1866,7 @@ int main(int argc, char **argv) {
 		.font = strdup("sans-serif"),
 		.font_size = 0,
 		.radius = 100,
-		.thickness = 10,
+		.thickness = 9,
 		.indicator_x_position = 0,
 		.indicator_y_position = 0,
 		.override_indicator_x_position = false,
@@ -1884,7 +1886,7 @@ int main(int argc, char **argv) {
 		.indicator = false,
 		.clock = false,
 		.timestr = strdup("%T"),
-		.datestr = strdup("%x"),
+		.datestr = strdup("%a, %x"),
 		.allow_fade = true,
 		.password_grace_period = 0,
 
