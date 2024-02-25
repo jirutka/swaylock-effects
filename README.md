@@ -18,7 +18,7 @@ which is no longer maintained.
 
 	swaylock \
 		--screenshots \
-                --battery \
+		--battery \
 		--clock \
 		--indicator \
 		--indicator-radius 100 \
