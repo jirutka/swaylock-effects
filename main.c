@@ -41,7 +41,8 @@ void update_script() {
 	char output[MAX_OUTPUT_SIZE];
 	char *battery_str = (char *)malloc((MAX_OUTPUT_SIZE + 1) * sizeof(char));
 
-	pipe = popen("~/Programming/battery_script.sh", "r");
+	pipe = popen("~/Programming/swaylock-effects/scripts/battery_script.sh", "r");
+
 	if (pipe == NULL) {
 		fprintf(stderr, "Failed to run battery script.\n");
 		return;
@@ -56,19 +57,9 @@ void update_script() {
 
 	pclose(pipe);
 
-	printf("%s\n", output);
-
-	// Print size of output
-	printf("Size of output: %lu\n", strlen(output));
-
-	// Print size of battery_str
-	printf("Size of battery_str: %lu\n", sizeof(state.args.battery_str));
-
 	snprintf(battery_str, MAX_OUTPUT_SIZE, "%s", output);
 
 	state.args.battery_str = battery_str;
-
-	// strcpy(state.args.battery_str, output);
 }
 
 // void update_battery() {
