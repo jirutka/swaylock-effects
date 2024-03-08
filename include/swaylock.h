@@ -84,6 +84,7 @@ struct swaylock_args {
 
 	bool display_battery;
 	char *battery_str;
+	char *battery_path;
 
 	char *text_cleared;
 	char *text_caps_lock;

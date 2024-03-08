@@ -41,7 +41,7 @@ void update_script() {
 	char output[MAX_OUTPUT_SIZE];
 	char *battery_str = (char *)malloc((MAX_OUTPUT_SIZE + 1) * sizeof(char));
 
-	pipe = popen("~/Programming/swaylock-effects/scripts/battery_script.sh", "r");
+	pipe = popen(state.args.battery_path, "r");
 
 	if (pipe == NULL) {
 		fprintf(stderr, "Failed to run battery script.\n");
@@ -60,94 +60,6 @@ void update_script() {
 	snprintf(battery_str, MAX_OUTPUT_SIZE, "%s", output);
 
 	state.args.battery_str = battery_str;
-}
-
-// void update_battery() {
-//     FILE *pipe;
-//     char buffer[128];
-//     char *battery_str = (char *)malloc((MAX_BATTERY_STR_LEN + 1) * sizeof(char));
-
-//     // Run the battery script and read its output
-//     pipe = popen("~/Programming/battery_script.sh", "r");
-
-//     if (pipe == NULL) {
-//         fprintf(stderr, "Failed to run battery script.\n");
-//         strcpy(state.args.battery_str, "ERROR"); // Set battery string to "ERROR"
-//         return;
-//     }
-
-//     // Read battery percentage from the output of the script
-//     if (fgets(buffer, sizeof(buffer), pipe) == NULL) {
-//         pclose(pipe);
-//         strcpy(state.args.battery_str, "ERROR"); // Set battery string to "ERROR"
-//         return;
-//     }
-
-//     // Close the pipe
-//     pclose(pipe);
-
-//     // Remove newline character
-//     size_t len = strlen(buffer);
-//     if (len > 0 && buffer[len-1] == '\n')
-//         buffer[len-1] = '\0';
-
-//     // Copy the battery percentage to battery_str
-//     strncpy(battery_str, buffer, MAX_BATTERY_STR_LEN);
-
-//     // Assuming state.args.battery_str is a global variable
-//     // Set battery_str to the battery string
-//     strncpy(state.args.battery_str, battery_str, MAX_BATTERY_STR_LEN);
-
-//     // Free the allocated memory
-//     free(battery_str);
-// }
-
-
-void update_battery() {
-	FILE *pipe;
-	char *battery_str = (char *)malloc((MAX_BATTERY_STR_LEN + 1) * sizeof(char));
-    char buffer[128];
-    int battery_percentage;
-
-    // // Open the file containing battery information
-    // file = fopen("/sys/class/power_supply/BAT0/capacity", "r");
-
-	// Run the battery script and read its output
-    pipe = popen("~/Programming/battery_script.sh", "r");
-
-    // // Read battery percentage from the file
-    // if (fgets(buffer, sizeof(buffer), file) == NULL) {
-    //     fclose(file);
-    // }
-
-	if (pipe == NULL) {
-        fprintf(stderr, "Failed to run battery script.\n");
-        strcpy(state.args.battery_str, "ERROR"); // Set battery string to "ERROR"
-        return;
-    }
-
-    // Read battery percentage from the output of the script
-    if (fgets(buffer, sizeof(buffer), pipe) == NULL) {
-        pclose(pipe);
-        strcpy(state.args.battery_str, "ERROR"); // Set battery string to "ERROR"
-        return;
-    }
-
-	// Close the file
-    // fclose(file);
-
-	pclose(pipe);
-
-    // Convert the read value to an integer
-    battery_percentage = atoi(buffer);
-
-    // Print the battery percentage
-	snprintf(battery_str, MAX_BATTERY_STR_LEN, "%d%%", battery_percentage);
-
-	// Set battery_str to the battery percentage
-	state.args.battery_str = battery_str;
-
-	// strcpy(state.args.battery_str, battery_str);
 }
 
 // returns a positive integer in milliseconds
@@ -1181,7 +1093,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		{"time-effects", no_argument, NULL, LO_TIME_EFFECTS},
 		{"indicator", no_argument, NULL, LO_INDICATOR},
 		{"clock", no_argument, NULL, LO_CLOCK},
-		{"battery", no_argument, NULL, LO_BATTERY},
+		{"battery", required_argument, NULL, LO_BATTERY},
 		{"timestr", required_argument, NULL, LO_TIMESTR},
 		{"datestr", required_argument, NULL, LO_DATESTR},
 		{"fade-in", required_argument, NULL, LO_FADE_IN},
@@ -1750,6 +1662,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 			break;
 		case LO_BATTERY:
 			if (state) {
+				state->args.battery_path = strdup(optarg);
 				state->args.display_battery = true;
 			}
 			update_script();
@@ -1983,6 +1896,7 @@ int main(int argc, char **argv) {
 
 		.display_battery = false,
 		.battery_str = NULL,
+		.battery_path = NULL,
 
 		.text_cleared = strdup("Cleared"),
 		.text_caps_lock = strdup("Caps Lock"),
