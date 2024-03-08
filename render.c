@@ -68,9 +68,9 @@ static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, 
 		*dstr = NULL;
 	}
 
-	if (surface->state->args.display_battery) {
-		// Write battery percentage
-		snprintf(bbuf, sizeof(bbuf), "%s", surface->state->args.battery_str);
+	if (surface->state->args.display_script) {
+		// Write script output
+		snprintf(bbuf, sizeof(bbuf), "%s", surface->state->args.script_str);
 		*bstr = bbuf;
 	} else {
 		*bstr = NULL;
@@ -300,7 +300,7 @@ void render_frame(struct swaylock_surface *surface) {
 					snprintf(attempts, sizeof(attempts), "%d", state->failed_attempts);
 					text = attempts;
 				}
-			} else if (state->args.clock || state->args.display_battery) {
+			} else if (state->args.clock || state->args.display_script) {
 				subtext(surface, &text_l1, &text_l2, &text_l3);
 			}
 
@@ -320,7 +320,7 @@ void render_frame(struct swaylock_surface *surface) {
 			}
 			break;
 		default:
-			if (state->args.clock || state->args.display_battery)
+			if (state->args.clock || state->args.display_script)
 				subtext(surface, &text_l1, &text_l2, &text_l3);
 			break;
 		}

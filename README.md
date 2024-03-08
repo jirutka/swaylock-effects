@@ -1,7 +1,7 @@
-# swaylock-effects-battery
+# swaylock-effects-script
 
-Swaylock-effects-battery is a fork of [swaylock-effects](https://github.com/jirutka/swaylock-effects)
-which adds a battery percentage display feature.
+Swaylock-effects-script is a fork of [swaylock-effects](https://github.com/jirutka/swaylock-effects)
+which adds a script output display feature.
 
 Swaylock-effects is a fork of [swaylock](https://github.com/swaywm/swaylock)
 which adds built-in screenshots and image manipulation effects like blurring.
@@ -18,7 +18,7 @@ which is no longer maintained.
 
 	swaylock \
 		--screenshots \
-		--battery ~/path_to_script \
+		--script ~/path_to_script \
 		--clock \
 		--indicator \
 		--indicator-radius 100 \
@@ -37,7 +37,7 @@ which is no longer maintained.
 
 The main new features compared to upstream swaylock are:
 
-* `--battery` to display the battery percentage
+* `--script` to display the script output
 * `--screenshots` to use screenshots instead of an image on disk or a color
 * `--clock` to show date/time in the indicator
 	* Use `--indicator` to make the indicator always active

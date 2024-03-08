@@ -30,7 +30,6 @@
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "ext-session-lock-v1-client-protocol.h"
 
-#define MAX_BATTERY_STR_LEN 5
 #define MAX_OUTPUT_SIZE 1024
 
 static struct swaylock_state state;
@@ -39,12 +38,12 @@ void update_script() {
 	FILE *pipe;
 	char path[1035];
 	char output[MAX_OUTPUT_SIZE];
-	char *battery_str = (char *)malloc((MAX_OUTPUT_SIZE + 1) * sizeof(char));
+	char *script_str = (char *)malloc((MAX_OUTPUT_SIZE + 1) * sizeof(char));
 
-	pipe = popen(state.args.battery_path, "r");
+	pipe = popen(state.args.script_path, "r");
 
 	if (pipe == NULL) {
-		fprintf(stderr, "Failed to run battery script.\n");
+		fprintf(stderr, "Failed to run script.\n");
 		return;
 	}
 
@@ -57,9 +56,9 @@ void update_script() {
 
 	pclose(pipe);
 
-	snprintf(battery_str, MAX_OUTPUT_SIZE, "%s", output);
+	snprintf(script_str, MAX_OUTPUT_SIZE, "%s", output);
 
-	state.args.battery_str = battery_str;
+	state.args.script_str = script_str;
 }
 
 // returns a positive integer in milliseconds
@@ -430,7 +429,7 @@ static const struct wl_callback_listener surface_frame_listener;
 static void surface_frame_handle_done(void *data, struct wl_callback *callback,
 		uint32_t time) {
 
-	if (state.args.display_battery) {
+	if (state.args.display_script) {
 		update_script();
 	};
 
@@ -1012,7 +1011,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		LO_TIME_EFFECTS,
 		LO_INDICATOR,
 		LO_CLOCK,
-		LO_BATTERY,
+		LO_SCRIPT,
 		LO_TIMESTR,
 		LO_DATESTR,
 		LO_FADE_IN,
@@ -1093,7 +1092,7 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 		{"time-effects", no_argument, NULL, LO_TIME_EFFECTS},
 		{"indicator", no_argument, NULL, LO_INDICATOR},
 		{"clock", no_argument, NULL, LO_CLOCK},
-		{"battery", required_argument, NULL, LO_BATTERY},
+		{"script", required_argument, NULL, LO_SCRIPT},
 		{"timestr", required_argument, NULL, LO_TIMESTR},
 		{"datestr", required_argument, NULL, LO_DATESTR},
 		{"fade-in", required_argument, NULL, LO_FADE_IN},
@@ -1153,8 +1152,8 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 			"Disable the unlock indicator.\n"
 		"  --indicator                      "
 			"Always show the indicator.\n"
-		"  --battery                        "
-			"Show the battery percentage.\n"
+		"  --script                        "
+			"Show the script output.\n"
 		"  --clock                          "
 			"Show time and date.\n"
 		"  --timestr <format>               "
@@ -1660,10 +1659,10 @@ static int parse_options(int argc, char **argv, struct swaylock_state *state,
 				state->args.clock = true;
 			}
 			break;
-		case LO_BATTERY:
+		case LO_SCRIPT:
 			if (state) {
-				state->args.battery_path = strdup(optarg);
-				state->args.display_battery = true;
+				state->args.script_path = strdup(optarg);
+				state->args.display_script = true;
 			}
 			update_script();
 			break;
@@ -1894,9 +1893,9 @@ int main(int argc, char **argv) {
 		.allow_fade = true,
 		.password_grace_period = 0,
 
-		.display_battery = false,
-		.battery_str = NULL,
-		.battery_path = NULL,
+		.display_script = false,
+		.script_str = NULL,
+		.script_path = NULL,
 
 		.text_cleared = strdup("Cleared"),
 		.text_caps_lock = strdup("Caps Lock"),
