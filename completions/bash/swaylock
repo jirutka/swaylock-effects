@@ -41,6 +41,7 @@ _swaylock()
     --hide-keyboard-layout
     --ignore-empty-password
     --image
+    --fingerprint
     --indicator-caps-lock
     --indicator-idle-visible
     --indicator-radius

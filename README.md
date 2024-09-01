@@ -119,6 +119,9 @@ Install dependencies:
 * [scdoc](https://git.sr.ht/~sircmpwn/scdoc) (optional: man pages) \*
 * git \*
 * openmp (if using a compiler other than GCC)
+* fprintd
+* dbus \*
+* glib \*
 
 _\*Compile-time dep_
 

@@ -93,6 +93,7 @@ conf_data.set_quoted('SWAYLOCK_VERSION', version)
 conf_data.set10('HAVE_GDK_PIXBUF', gdk_pixbuf.found())
 
 subdir('include')
+subdir('fingerprint')
 
 dependencies = [
 	cairo,
@@ -102,7 +103,8 @@ dependencies = [
 	dl,
 	xkbcommon,
 	wayland_client,
-	omp
+	omp,
+  fingerprint
 ]
 
 sources = [
