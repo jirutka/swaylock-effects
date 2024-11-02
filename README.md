@@ -1,11 +1,15 @@
-# swaylock-effects
+# swaylock-effects-script
+
+Swaylock-effects-script is a fork of [swaylock-effects](https://github.com/jirutka/swaylock-effects)
+which adds a script output display feature.
 
 Swaylock-effects is a fork of [swaylock](https://github.com/swaywm/swaylock)
 which adds built-in screenshots and image manipulation effects like blurring.
 It's inspired by [i3lock-color](https://github.com/PandorasFox/i3lock-color),
 although the feature sets aren't perfectly overlapping.
 
-This repository ([jirutka/swaylock-effects](https://github.com/jirutka/swaylock-effects))
+This repository ([sidharthmrao/swaylock-effects-script](https://github.com/sidharthmrao/swaylock-effects-script))
+is a fork of ([jirutka/swaylock-effects](https://github.com/jirutka/swaylock-effects)) which
 is a fork of [mortie/swaylock-effects](https://github.com/mortie/swaylock-effects)
 which is no longer maintained.
 
@@ -15,6 +19,7 @@ which is no longer maintained.
 
 	swaylock \
 		--screenshots \
+		--script `path_to_script` \
 		--clock \
 		--indicator \
 		--indicator-radius 100 \
@@ -33,6 +38,7 @@ which is no longer maintained.
 
 The main new features compared to upstream swaylock are:
 
+* `--script` to display the script output
 * `--screenshots` to use screenshots instead of an image on disk or a color
 * `--clock` to show date/time in the indicator
 	* Use `--indicator` to make the indicator always active
@@ -129,6 +135,10 @@ Run these commands:
 	meson build
 	ninja -C build
 	sudo ninja -C build install
+
+On systems with PAM, copy pam/swaylock to /etc/pam.d/swaylock
+
+	sudo cp pam/swaylock /etc/pam.d/swaylock
 
 On systems without PAM, you need to suid the swaylock binary:
 

@@ -82,6 +82,10 @@ struct swaylock_args {
 	bool password_grace_no_mouse;
 	bool password_grace_no_touch;
 
+	bool display_script;
+	char *script_str;
+	char *script_path;
+
 	char *text_cleared;
 	char *text_caps_lock;
 	char *text_verifying;

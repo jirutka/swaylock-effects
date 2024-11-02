@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
+#include <stdio.h>
+#include <string.h>
 #include <wayland-client.h>
 #include "cairo.h"
 #include "background-image.h"
@@ -40,9 +42,10 @@ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
 	}
 }
 
-static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr) {
+static void subtext(struct swaylock_surface *surface, char **tstr, char **dstr, char **bstr) {
 	static char dbuf[256];
 	static char tbuf[256];
+	static char bbuf[256];
 
 	// Use user's locale for strftime calls
 	char *prevloc = setlocale(LC_TIME, NULL);
@@ -51,18 +54,26 @@ static void timetext(struct swaylock_surface *surface, char **tstr, char **dstr)
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 
-	if (surface->state->args.timestr[0]) {
+	if (surface->state->args.clock && surface->state->args.timestr[0]) {
 		strftime(tbuf, sizeof(tbuf), surface->state->args.timestr, tm);
 		*tstr = tbuf;
 	} else {
 		*tstr = NULL;
 	}
 
-	if (surface->state->args.datestr[0]) {
+	if (surface->state->args.clock && surface->state->args.datestr[0]) {
 		strftime(dbuf, sizeof(dbuf), surface->state->args.datestr, tm);
 		*dstr = dbuf;
 	} else {
 		*dstr = NULL;
+	}
+
+	if (surface->state->args.display_script) {
+		// Write script output
+		snprintf(bbuf, sizeof(bbuf), "%s", surface->state->args.script_str);
+		*bstr = bbuf;
+	} else {
+		*bstr = NULL;
 	}
 
 	// Set it back, so we don't break stuff
@@ -252,6 +263,7 @@ void render_frame(struct swaylock_surface *surface) {
 		char *text = NULL;
 		char *text_l1 = NULL;
 		char *text_l2 = NULL;
+		char *text_l3 = NULL;
 		const char *layout_text = NULL;
 		double font_size;
 		char attempts[4]; // like i3lock: count no more than 999
@@ -288,8 +300,8 @@ void render_frame(struct swaylock_surface *surface) {
 					snprintf(attempts, sizeof(attempts), "%d", state->failed_attempts);
 					text = attempts;
 				}
-			} else if (state->args.clock) {
-				timetext(surface, &text_l1, &text_l2);
+			} else if (state->args.clock || state->args.display_script) {
+				subtext(surface, &text_l1, &text_l2, &text_l3);
 			}
 
 			xkb_layout_index_t num_layout = xkb_keymap_num_layouts(state->xkb.keymap);
@@ -308,15 +320,25 @@ void render_frame(struct swaylock_surface *surface) {
 			}
 			break;
 		default:
-			if (state->args.clock)
-				timetext(surface, &text_l1, &text_l2);
+			if (state->args.clock || state->args.display_script)
+				subtext(surface, &text_l1, &text_l2, &text_l3);
 			break;
 		}
 
-		if (text_l1 && !text_l2)
+		if (text_l1 && !text_l2 && !text_l3) {
 			text = text_l1;
-		if (text_l2 && !text_l1)
+		}
+		if (text_l2 && !text_l1 && !text_l3) {
 			text = text_l2;
+		}
+		if (text_l3 && !text_l1 && !text_l2) {
+			text = text_l3;
+		}
+
+		if (text_l1 && text_l3 && !text_l2) {
+			text_l2 = text_l3;
+			text_l3 = NULL;
+		}
 
 		if (text) {
 			cairo_text_extents_t extents;
@@ -344,6 +366,7 @@ void render_frame(struct swaylock_surface *surface) {
 
 			/* Top */
 
+			cairo_set_font_size(cairo, arc_radius / 3.0f);
 			cairo_text_extents(cairo, text_l1, &extents_l1);
 			cairo_font_extents(cairo, &fe_l1);
 			x_l1 = (buffer_width / 2) -
@@ -358,13 +381,13 @@ void render_frame(struct swaylock_surface *surface) {
 
 			/* Bottom */
 
-			cairo_set_font_size(cairo, arc_radius / 6.0f);
+			cairo_set_font_size(cairo, arc_radius / 5.5f);
 			cairo_text_extents(cairo, text_l2, &extents_l2);
 			cairo_font_extents(cairo, &fe_l2);
 			x_l2 = (buffer_width / 2) -
 				(extents_l2.width / 2 + extents_l2.x_bearing);
 			y_l2 = (buffer_diameter / 2) +
-				(fe_l2.height / 2 - fe_l2.descent) + arc_radius / 3.5f;
+				(fe_l2.height / 2 - fe_l2.descent) + arc_radius / 4.0f;
 
 			cairo_move_to(cairo, x_l2, y_l2);
 			cairo_show_text(cairo, text_l2);
@@ -378,6 +401,30 @@ void render_frame(struct swaylock_surface *surface) {
 
 
 			cairo_set_font_size(cairo, font_size);
+
+			if (text_l3) {
+				cairo_text_extents_t extents_l3;
+				cairo_font_extents_t fe_l3;
+				double x_l3, y_l3;
+
+				/* Even more Bottom */
+
+				cairo_set_font_size(cairo, arc_radius / 5.0f);
+				cairo_text_extents(cairo, text_l3, &extents_l3);
+				cairo_font_extents(cairo, &fe_l3);
+				x_l3 = (buffer_width / 2) -
+					(extents_l3.width / 2 + extents_l3.x_bearing);
+				y_l3 = (buffer_diameter / 2) +
+					(fe_l3.height / 2 - fe_l3.descent) + arc_radius / 1.9f;
+
+				cairo_move_to(cairo, x_l3, y_l3);
+				cairo_show_text(cairo, text_l3);
+				cairo_close_path(cairo);
+				cairo_new_sub_path(cairo);
+
+				if (new_width < extents_l3.width)
+					new_width = extents_l3.width;
+			}
 		}
 
 		// Typing indicator: Highlight random part on keypress
