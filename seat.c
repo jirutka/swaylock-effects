@@ -129,10 +129,15 @@ static const struct wl_keyboard_listener keyboard_listener = {
 	.repeat_info = keyboard_repeat_info,
 };
 
+static wl_fixed_t last_x = 0;
+static wl_fixed_t last_y = 0;
+
 static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
 		uint32_t serial, struct wl_surface *surface,
 		wl_fixed_t surface_x, wl_fixed_t surface_y) {
 	wl_pointer_set_cursor(wl_pointer, serial, NULL, 0, 0);
+	last_x = surface_x;
+	last_y = surface_y;
 }
 
 static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer,
@@ -142,7 +147,11 @@ static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer,
 
 static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer,
 		uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
-	swaylock_handle_mouse((struct swaylock_state *)data);
+	if (surface_x != last_x || surface_y != last_y) {
+		swaylock_handle_mouse((struct swaylock_state *)data);
+		last_x = surface_x;
+		last_y = surface_y;
+	}
 }
 
 static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
